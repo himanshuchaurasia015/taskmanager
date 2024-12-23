@@ -1,33 +1,49 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import CreateProjectModal from "../components/CreateProjectModal";
+import { Outlet, useNavigate } from "react-router-dom";
 const ProjectDashboard = () => {
+  const navigate = useNavigate();
   const { user, url } = useAuth();
   const [activeTab, setActiveTab] = useState("projects");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
-
-
-  // Sample data - replace with actual API calls
   const [projects, setProjects] = useState([
     {
       id: 1,
-      title: "React Dashboard",
+      project_name: "React Dashboard",
       description: "Create a responsive dashboard",
       status: "OPEN",
-      deadline: "2024-12-31",
+      end_date: "2024-12-31",
     },
     {
       id: 2,
-      title: "API Integration",
+      project_name: "API Integration",
       description: "Implement REST API",
       status: "ASSIGNED",
-      deadline: "2024-12-25",
+      end_date: "2024-12-25",
     },
   ]);
+
+  useEffect(() => {
+    const fetchdata = async () => {
+      await axios
+        .get(`${url}/projects`, { withCredentials: true })
+        .then((res) => {
+          console.log(res.data.project);
+          setProjects(res.data.project);
+          console.log(projects);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
+    fetchdata();
+  }, [url]);
+  // Sample data - replace with actual API calls
 
   const [assignments, setAssignments] = useState([
     {
@@ -68,9 +84,9 @@ const ProjectDashboard = () => {
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 Title
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              {/* <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 Status
-              </th>
+              </th> */}
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 Deadline
               </th>
@@ -81,9 +97,9 @@ const ProjectDashboard = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {projects.map((project) => (
-              <tr key={project.id}>
-                <td className="px-6 py-4">{project.title}</td>
-                <td className="px-6 py-4">
+              <tr key={project._id}>
+                <td className="px-6 py-4">{project.project_name}</td>
+                {/* <td className="px-6 py-4">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                     ${
@@ -96,23 +112,29 @@ const ProjectDashboard = () => {
                   >
                     {project.status}
                   </span>
+                </td> */}
+                <td className="px-6 py-4">
+                  {new Date(project.end_date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "numeric",
+                    day: "numeric",
+                  })}
                 </td>
-                <td className="px-6 py-4">{project.deadline}</td>
                 <td className="px-6 py-4">
                   {user.role === "admin" ? (
                     <>
                       <button
-                        onClick={() => setShowAssignModal(true)}
+                        onClick={() => navigate(`${project._id}`)}
                         className="text-blue-600 hover:text-blue-900 mr-3"
                       >
                         Assign
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => setShowScoreModal(true)}
                         className="text-green-600 hover:text-green-900"
                       >
                         Score
-                      </button>
+                      </button> */}
                     </>
                   ) : (
                     <button
@@ -194,7 +216,6 @@ const ProjectDashboard = () => {
             Project Management System
           </h1>
         </div>
-
         <div className="mb-6">
           <nav className="flex space-x-4">
             <button

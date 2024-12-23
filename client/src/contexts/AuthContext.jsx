@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
+
   const url = "http://localhost:3121/api";
   const login = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));

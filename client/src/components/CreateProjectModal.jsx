@@ -17,7 +17,7 @@ const CreateProjectModal = ({ setShowCreateModal }) => {
           project_name: name,
           description: description,
           end_date: end_date,
-          created_by: user.id,
+          created_by: user._id,
         },
         { withCredentials: true }
       );

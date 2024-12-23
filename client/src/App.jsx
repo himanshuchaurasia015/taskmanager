@@ -1,11 +1,20 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useParams,
+} from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUp from "./pages/SignUp";
 import ProjectDashboard from "./pages/ProjectDashboard";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import AssignProjectModal from "./components/AssignProjectModal";
+import Dashboard from "./pages/Dashboard";
+const AssignWrapper = () => {
+  const { projectId } = useParams();
+  return <AssignProjectModal projectId={projectId} />;
+};
 const router = createBrowserRouter([
   {
     path: "/",
@@ -19,13 +28,18 @@ const router = createBrowserRouter([
     path: "/signup",
     element: <SignUp />,
   },
+  { path: "/assign", element: <SignUp /> },
   {
     path: "/dashboard",
     element: (
       <ProtectedRoute allowedRoles={["admin", "candidate"]}>
-        <ProjectDashboard />
+        <Dashboard />
       </ProtectedRoute>
     ),
+    children: [
+      { path: "", element: <ProjectDashboard /> },
+      { path: ":projectId", element: <AssignWrapper /> },
+    ],
   },
 ]);
 

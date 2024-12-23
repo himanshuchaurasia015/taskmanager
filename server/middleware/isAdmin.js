@@ -1,1 +1,3 @@
-export const isAdmin = (req, res, next) => {};
+export const isAdmin = (req, res, next) => {
+  next();
+};

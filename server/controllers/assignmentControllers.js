@@ -1,5 +1,6 @@
 import assignment from "../models/assignmentSchema.js";
-
+import User from "../models/userSchema.js";
+import mongoose from "mongoose";
 export const getAssignments = (req, res) => {};
 
 // Assigned a project to a user
@@ -78,3 +79,47 @@ export const updateAssignment = async (req, res) => {
     });
 };
 export const deleteAssignment = (req, res) => {};
+export const getUnAssignedUsers = async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+    console.log(projectId);
+    if (!projectId) {
+      return res.status(400).json({ msg: "Project ID not found" });
+    }
+
+    const unAssignedUsers = await User.aggregate([
+      {
+        $lookup: {
+          from: "assignments", // Correct collection name
+          localField: "_id",
+          foreignField: "user_id",
+          as: "assignments",
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              "assignments.project_id": {
+                $ne: new mongoose.Types.ObjectId(projectId),
+              },
+            }, // Use 'new' here
+            { assignments: { $eq: [] } },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json({ users: unAssignedUsers });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Server error" });
+  }
+};
